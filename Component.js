@@ -10,6 +10,12 @@ export class Component {
 		Object.assign((this.props = {}), props);
 	}
 
+
+	/**
+	 *  Получить то this.template тестовую версию html документа и
+	 *  с помощью DOMParser получить объект типа HTMLDocument
+	 * @returns {Promise<any>} возвращает объект типа HTMLDocument
+	 */
 	get dom() {
 		console.log('dom function______________');
 		return new Promise((rv) => {
@@ -20,6 +26,13 @@ export class Component {
 		});
 	}
 
+	/**
+	 * Отправляет GET запрос c  this.template_file на сервер,
+	 * обрабатывает ответ, полученный в виде текста (resp.text),
+	 * присваивает его this.template_content и разрешает template промис с rv(this.template_content)
+	 *
+	 * @returns {Promise<any>} представление html в виде текста (this.template_content)
+	 */
 	get template() {
 		console.log('template function______________');
 		return new Promise((rv) => {
@@ -42,9 +55,10 @@ export class Component {
 	}
 
 	/**
+	 * Получить свойство по имени
 	 *
-	 * @param name
-	 * @returns {Promise<*>}
+	 * @param name имя свойства или метода
+	 * @returns {Promise<*>} возвратить свойство или метод или undefined
 	 * @private
 	 */
 	async _get(name) {
@@ -54,9 +68,10 @@ export class Component {
 	}
 
 	/**
+	 * Получить свойство по имени
 	 *
-	 * @param name
-	 * @returns {Promise<*>}
+	 * @param name имя свойства или метода
+	 * @returns {Promise<*>} возвратить свойство или метод или undefined
 	 * @private
 	 */
 	async _get_value(name) {
@@ -65,6 +80,9 @@ export class Component {
 		if (r === undefined) {
 			try {
 				r = JSON.parse(name);
+				console.log('json parse');
+				console.log(name);
+				console.log(r);
 			} catch (e_json) {
 				try {
 					r = eval(a.value);
@@ -76,9 +94,11 @@ export class Component {
 	}
 
 	/**
+	 *	Получить обновлённую строку с заменой дефолтных значений
 	 *
-	 * @param s
-	 * @returns {Promise<*>}
+	 * @param s строка
+	 * @returns {Promise<*>} возвратить обновлённую строку с соотствествующим значением вида:
+	 * {{deafult_prop}} => current_prop
 	 */
 	async renderString(s) {
 		console.log('renderString function______________');
@@ -93,6 +113,12 @@ export class Component {
 		return s;
 	}
 
+	/**
+	 *  Получить список аттрибутов узла в виде объекта
+	 *
+	 * @param node узел
+	 * @returns {Promise<void>} возвратить список аттрибутов узла в виде объекта
+	 */
 	async parseAttributes(node) {
 		console.log('parseAttributes function______________');
 		const attributes = node.attributes;
@@ -106,14 +132,14 @@ export class Component {
 					case this.constructor.EVENT_PREFIX:
 						// event
 						(o._events || (o._events = {}))[name1] = await this._get(a.value);
-						await this.addEventHandler(node, name1,o._events[name1])
+						await this.addEventHandler(node, name1, o._events[name1])
 						break;
 					case this.constructor.REACTIVE_PROP_PREFIX:
 						// reactive prop
 
 						o[name1] = await this._get_value(a.value);
 						console.log(this.constructor)
-						console.log(name1+" "+o[name1])
+						console.log(name1 + " " + o[name1])
 						await this.addAttribute(node, name1, o[name1], this.constructor.REACTIVE_PROP_PREFIX)
 						break;
 					default:
@@ -126,8 +152,11 @@ export class Component {
 	}
 
 	/**
+	 * Обработать дочерние элементы узла-предка
+	 * Если для дочернего узла в assoc есть соотвествущий файл для рендеринга,
+	 * то вызывать на этот дочерний узел render
 	 *
-	 * @param parent
+	 * @param parent узел
 	 * @returns {Promise<void>}
 	 */
 	async renderChilds(parent) {
@@ -166,43 +195,80 @@ export class Component {
 		}
 	}
 
-	async addAttribute(node, attrName, attrValue, prefix){
+	/**
+	 * Добавить аттрибут к узлу
+	 *
+	 * @param node узел
+	 * @param attrName имя аттрибута
+	 * @param attrValue значение аттрибута
+	 * @param prefix  префикс (optional
+	 * @returns {Promise<void>}
+	 */
+	async addAttribute(node, attrName, attrValue, prefix) {
 		node.setAttribute(attrName, attrValue);
 		await this.removeRelatedAttribute(node, attrName, prefix)
 	}
 
 
+	/**
+	 * Добавить к узлу обработчика соответсвующего события
+	 *
+	 * @param node узел
+	 * @param eventName имя события
+	 * @param eventHandler обработчик
+	 * @returns {Promise<void>}
+	 */
 	async addEventHandler(node, eventName, eventHandler) {
 		console.log(event);
 		console.log('addEventListener function______________');
 		// for (let event in events) {
-			node.addEventListener(eventName, eventHandler);
-			await this.removeRelatedAttribute(node, eventName, this.constructor.EVENT_PREFIX)
+		node.addEventListener(eventName, eventHandler);
+		await this.removeRelatedAttribute(node, eventName, this.constructor.EVENT_PREFIX)
 		// }
 	}
 
 	/**
-	 * Удаляет аттрибут узла по имени аттрибута и префиксу
+	 * Удалить аттрибут узла по имени аттрибута и префиксу
+	 *
 	 * @param node узел
 	 * @param attrName имя аттрибута
-	 * @param prefix префикс
+	 * @param prefix префикс (optional)
 	 * @returns {Promise<void>}
 	 */
 	async removeRelatedAttribute(node, attrName, prefix) {
+		console.log('removeRelatedAttribute function______________');
 		if (node && attrName) {
 			node.removeAttribute((prefix || '') + attrName);
 			console.log(`Attribute ${attrName} has been removed`);
 		}
 	}
 
+
+	/**
+	 * Связать элемент в HTML документе с обработанным объектом
+	 *
+	 * @param element, отвечающий за положение соотвествующего HTML документы на главное странице
+	 * @param body обработанный объект (HTMLDocument)
+	 * @returns {Promise<void>}
+	 */
 	async renderWithBody(element, body) {
+		console.log('renderWithBody function______________');
 		await this.renderChilds(body);
 		console.log(body.childNodes)
 		element.replaceWith(...Array.from(body.childNodes));
 	}
 
+	/**
+	 * Обработать соотвестсвующий HTML документ текущего класса
+	 *
+	 * @param element, отвечающий за положение соотвествующего HTML документы на главное странице
+	 * @returns {Promise<void>}
+	 */
 	async render(element) {
+		console.log('render function______________');
 		const dom = await this.dom;
+		console.log(dom.constructor)
+		console.log(typeof dom);
 		await this.renderWithBody(element, dom.body);
 	}
 }
