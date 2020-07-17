@@ -4,7 +4,6 @@ export class Component {
 	static REACTIVE_PROP_PREFIX = ':';
 
 	constructor(props = {}) {
-		console.log('constructor function______________' + this.constructor);
 		this.template_content = undefined;
 		this.template_file = undefined;
 		Object.assign((this.props = {}), props);
@@ -17,7 +16,6 @@ export class Component {
 	 * @returns {Promise<any>} возвращает объект типа HTMLDocument
 	 */
 	get dom() {
-		console.log('dom function______________');
 		return new Promise((rv) => {
 			this.template.then((template) => {
 				console.log({template});
@@ -34,7 +32,6 @@ export class Component {
 	 * @returns {Promise<any>} представление html в виде текста (this.template_content)
 	 */
 	get template() {
-		console.log('template function______________');
 		return new Promise((rv) => {
 			if (this.template_content) {
 				rv(this.template_content);
@@ -46,8 +43,6 @@ export class Component {
 			fetch(this.template_file).then((resp) => {
 				resp.text().then((text) => {
 					this.template_content = text;
-					console.log('type');
-					console.log(typeof text)
 					rv(this.template_content);
 				});
 			});
@@ -62,7 +57,6 @@ export class Component {
 	 * @private
 	 */
 	async _get(name) {
-		console.log('_get function______________');
 		if (typeof this.props[name] !== "undefined") return this.props[name];
 		return this[name];
 	}
@@ -75,14 +69,10 @@ export class Component {
 	 * @private
 	 */
 	async _get_value(name) {
-		console.log('_get_value function______________');
 		let r = await this._get(name);
 		if (r === undefined) {
 			try {
 				r = JSON.parse(name);
-				console.log('json parse');
-				console.log(name);
-				console.log(r);
 			} catch (e_json) {
 				try {
 					r = eval(a.value);
@@ -94,16 +84,14 @@ export class Component {
 	}
 
 	/**
-	 *	Получить обновлённую строку с заменой дефолтных значений
+	 *    Получить обновлённую строку с заменой дефолтных значений
 	 *
 	 * @param s строка
 	 * @returns {Promise<*>} возвратить обновлённую строку с соотствествующим значением вида:
 	 * {{deafult_prop}} => current_prop
 	 */
 	async renderString(s) {
-		console.log('renderString function______________');
 		let off = 0;
-
 
 		for (let m of Array.from(s.matchAll(/\{\{([^\}]*)\}\}/g))) {
 			let [match, expr] = m;
@@ -120,13 +108,10 @@ export class Component {
 	 * @returns {Promise<void>} возвратить список атрибутов узла в виде объекта
 	 */
 	async parseAttributes(node) {
-		console.log('parseAttributes function______________');
 		const attributes = node.attributes;
 		const o = {};
 		await Promise.all(
 			Array.from(attributes).map(async (a) => {
-				console.log('attributes = ');
-				console.log(a)
 				let name1 = a.name.slice(1);
 				switch (a.name[0]) {
 					case this.constructor.EVENT_PREFIX:
@@ -138,8 +123,6 @@ export class Component {
 						// reactive prop
 
 						o[name1] = await this._get_value(a.value);
-						console.log(this.constructor)
-						console.log(name1 + " " + o[name1])
 						await this.addAttribute(node, name1, o[name1], this.constructor.REACTIVE_PROP_PREFIX)
 						break;
 					default:
@@ -160,23 +143,12 @@ export class Component {
 	 * @returns {Promise<void>}
 	 */
 	async renderChilds(parent) {
-		console.log('renderChilds function______________');
-		console.log('PARENT:');
-		console.log(parent);
-		console.log('this.props');
-		console.log(this.props);
-		console.log(this.constructor)
 		for (let node of parent.childNodes) {
-			console.log('node before')
-			console.log(node)
 			switch (node.nodeType) {
 				case 1: // tag
 					const tag = node.tagName.toLowerCase(),
 						tag_class = this.constructor.assoc[tag],
 						props = await this.parseAttributes(node);
-					console.log('tag: ' + tag);
-					console.log(node);
-
 					console.log({tag, props});
 
 					if (tag_class) {
@@ -219,12 +191,8 @@ export class Component {
 	 * @returns {Promise<void>}
 	 */
 	async addEventHandler(node, eventName, eventHandler) {
-		console.log(event);
-		console.log('addEventListener function______________');
-		// for (let event in events) {
 		node.addEventListener(eventName, eventHandler);
 		await this.removeRelatedAttribute(node, eventName, this.constructor.EVENT_PREFIX)
-		// }
 	}
 
 	/**
@@ -236,7 +204,6 @@ export class Component {
 	 * @returns {Promise<void>}
 	 */
 	async removeRelatedAttribute(node, attrName, prefix) {
-		console.log('removeRelatedAttribute function______________');
 		if (node && attrName) {
 			node.removeAttribute((prefix || '') + attrName);
 			console.log(`Attribute ${attrName} has been removed`);
@@ -252,15 +219,10 @@ export class Component {
 	 * @returns {Promise<void>}
 	 */
 	async renderWithBody(element, body) {
-		console.log('renderWithBody function______________');
 		await this.renderChilds(body);
-		console.log(body.childNodes)
-		console.log('back to renderWithBody');
-		console.log('DOCUMENT READY BEFORE');
+		;
 		console.log(document.readyState);
 		element.replaceWith(...Array.from(body.childNodes));
-		console.log('DOCUMENT READY AFTEER');
-		console.log(document.readyState);
 	}
 
 	/**
@@ -270,12 +232,7 @@ export class Component {
 	 * @returns {Promise<void>}
 	 */
 	async render(element) {
-		console.log('render function______________');
 		const dom = await this.dom;
-		console.log('DOCUMENT render before');
-		console.log(document.readyState);
 		await this.renderWithBody(element, dom.body);
-		console.log('DOCUMENT render AFTEER');
-		console.log(document.readyState);
 	}
 }
