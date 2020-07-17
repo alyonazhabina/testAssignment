@@ -168,11 +168,11 @@ export class Component {
 	}
 
 	/**
-	 * Добавить аттрибут к узлу
+	 * Добавить атрибут к узлу
 	 *
 	 * @param node узел
-	 * @param attrName имя аттрибута
-	 * @param attrValue значение аттрибута
+	 * @param attrName имя атрибута
+	 * @param attrValue значение атрибута
 	 * @param prefix  префикс (optional
 	 * @returns {Promise<void>}
 	 */
@@ -196,10 +196,10 @@ export class Component {
 	}
 
 	/**
-	 * Удалить аттрибут узла по имени аттрибута и префиксу
+	 * Удалить атрибут узла по имени атрибута и префиксу
 	 *
 	 * @param node узел
-	 * @param attrName имя аттрибута
+	 * @param attrName имя атрибута
 	 * @param prefix префикс (optional)
 	 * @returns {Promise<void>}
 	 */
