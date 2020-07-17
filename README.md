@@ -1,4 +1,4 @@
-### Тестовое задание на должность Middle Frontend Developer в компании Mywebar
+# Тестовое задание на должность Middle Frontend Developer в компании Mywebar
 
 ~~~~
 index.html - входной HTML файл
