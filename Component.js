@@ -114,10 +114,10 @@ export class Component {
 	}
 
 	/**
-	 *  Получить список аттрибутов узла в виде объекта
+	 *  Получить список атрибутов узла в виде объекта
 	 *
 	 * @param node узел
-	 * @returns {Promise<void>} возвратить список аттрибутов узла в виде объекта
+	 * @returns {Promise<void>} возвратить список атрибутов узла в виде объекта
 	 */
 	async parseAttributes(node) {
 		console.log('parseAttributes function______________');
@@ -245,9 +245,9 @@ export class Component {
 
 
 	/**
-	 * Связать элемент в HTML документе с обработанным объектом
+	 * Заменить дочерний элемент основного элемента на дочерние элементы обработанного объекта body
 	 *
-	 * @param element, отвечающий за положение соотвествующего HTML документы на главное странице
+	 * @param element, отвечающий за положение соотвествующего HTML документа на главное странице
 	 * @param body обработанный объект (HTMLDocument)
 	 * @returns {Promise<void>}
 	 */
@@ -255,7 +255,12 @@ export class Component {
 		console.log('renderWithBody function______________');
 		await this.renderChilds(body);
 		console.log(body.childNodes)
+		console.log('back to renderWithBody');
+		console.log('DOCUMENT READY BEFORE');
+		console.log(document.readyState);
 		element.replaceWith(...Array.from(body.childNodes));
+		console.log('DOCUMENT READY AFTEER');
+		console.log(document.readyState);
 	}
 
 	/**
@@ -267,8 +272,10 @@ export class Component {
 	async render(element) {
 		console.log('render function______________');
 		const dom = await this.dom;
-		console.log(dom.constructor)
-		console.log(typeof dom);
+		console.log('DOCUMENT render before');
+		console.log(document.readyState);
 		await this.renderWithBody(element, dom.body);
+		console.log('DOCUMENT render AFTEER');
+		console.log(document.readyState);
 	}
 }
